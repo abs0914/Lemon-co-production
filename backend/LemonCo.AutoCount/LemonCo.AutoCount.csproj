@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference local AutoCount DLLs directly -->
+    <!-- These are .NET Framework DLLs but .NET 8.0 can load them with some limitations -->
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+    <Reference Include="AutoCount">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AutoCount.Accounting">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.Accounting.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AutoCount.Stock">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.Stock.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AutoCount.Sales">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.Sales.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AutoCount.Manufacturing">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.Manufacturing.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AutoCount.ARAP">
+      <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.ARAP.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+
+    <PackageReference Include="Polly" Version="8.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LemonCo.Core\LemonCo.Core.csproj" />
+    <ProjectReference Include="..\LemonCo.Data\LemonCo.Data.csproj" />
+  </ItemGroup>
+
+</Project>
+

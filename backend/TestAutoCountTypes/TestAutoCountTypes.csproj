@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoCount2" Version="2.2.24" />
+    <PackageReference Include="AutoCount2.Accounting" Version="2.2.24" />
+    <PackageReference Include="AutoCount2.Stock" Version="2.2.24" />
+    <PackageReference Include="AutoCount2.Sales" Version="2.2.24" />
+    <PackageReference Include="AutoCount2.Manufacturing" Version="2.2.24" />
+  </ItemGroup>
+
+</Project>
+

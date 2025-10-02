@@ -10,7 +10,8 @@ public static class SalesOrderEndpoints
     {
         var group = app.MapGroup("/sales-orders")
             .WithTags("Sales Orders (Integration)")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization();
 
         // POST /sales-orders
         group.MapPost("/", async (

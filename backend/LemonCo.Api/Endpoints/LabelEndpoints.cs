@@ -10,7 +10,8 @@ public static class LabelEndpoints
     {
         var group = app.MapGroup("/labels")
             .WithTags("Labels & Barcodes")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization();
 
         // POST /labels/print
         group.MapPost("/print", async (

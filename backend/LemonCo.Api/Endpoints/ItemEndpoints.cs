@@ -10,7 +10,8 @@ public static class ItemEndpoints
     {
         var group = app.MapGroup("/items")
             .WithTags("Items & BOM")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization();
 
         // GET /items?search=
         group.MapGet("/", async (

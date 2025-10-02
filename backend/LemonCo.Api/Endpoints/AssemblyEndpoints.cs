@@ -10,7 +10,8 @@ public static class AssemblyEndpoints
     {
         var group = app.MapGroup("/assembly")
             .WithTags("Assembly Orders")
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization();
 
         // POST /assembly/orders
         app.MapPost("/assembly-orders", async (
@@ -35,7 +36,8 @@ public static class AssemblyEndpoints
         .WithSummary("Create a new assembly order")
         .Produces<AssemblyOrder>(201)
         .Produces(400)
-        .Produces(500);
+        .Produces(500)
+        .RequireAuthorization();
 
         // GET /assembly-orders/{docNo}
         group.MapGet("/orders/{docNo}", async (
@@ -69,7 +71,7 @@ public static class AssemblyEndpoints
             try
             {
                 var result = await assemblyService.PostAssemblyAsync(input);
-                return result.Success 
+                return result.Success
                     ? Results.Ok(result)
                     : Results.BadRequest(result);
             }
@@ -82,7 +84,8 @@ public static class AssemblyEndpoints
         .WithSummary("Post assembly order (consume materials, produce finished goods)")
         .Produces<PostAssemblyResult>(200)
         .Produces(400)
-        .Produces(500);
+        .Produces(500)
+        .RequireAuthorization();
 
         // DELETE /assembly-orders/{docNo}
         group.MapDelete("/orders/{docNo}", async (

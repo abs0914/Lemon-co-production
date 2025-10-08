@@ -66,7 +66,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:3001",
                 "https://lovable.dev",
                 "https://*.lovable.dev",
-                "https://your-app.lovable.app" // Replace with your actual Lovable domain
+                "https://lemonflow-ops.lovable.app" // Replace with your actual Lovable domain
               )
               .AllowAnyHeader()
               .AllowAnyMethod()

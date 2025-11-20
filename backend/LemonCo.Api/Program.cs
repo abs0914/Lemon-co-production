@@ -133,6 +133,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<AutoCountConnectionManager>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IAssemblyService, AssemblyService>();
 builder.Services.AddScoped<ISalesOrderService, SalesOrderService>();
 builder.Services.AddScoped<ILabelService, LabelService>();
@@ -184,6 +185,7 @@ app.MapGet("/health", async (AutoCountConnectionManager connectionManager) =>
 // Map endpoints
 app.MapAuthEndpoints();
 app.MapItemEndpoints();
+app.MapSupplierEndpoints();
 app.MapBomEndpoints();
 app.MapAssemblyEndpoints();
 app.MapSalesOrderEndpoints();

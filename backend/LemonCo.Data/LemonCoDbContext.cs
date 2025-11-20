@@ -21,21 +21,6 @@ public class LemonCoDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Seed default admin user (password: admin123)
-        modelBuilder.Entity<User>().HasData(
-            new User
-            {
-                Id = 1,
-                Username = "admin",
-                PasswordHash = "$2a$11$8K1p/a0dL3LKzOWR8Y5fqO7K5J5J5J5J5J5J5J5J5J5J5J5J5J5J5", // BCrypt hash
-                FullName = "System Administrator",
-                Role = "Admin",
-                Email = "admin@lemonco.com",
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            }
-        );
-
         // Seed default barcode config
         modelBuilder.Entity<AppConfig>().HasData(
             new AppConfig

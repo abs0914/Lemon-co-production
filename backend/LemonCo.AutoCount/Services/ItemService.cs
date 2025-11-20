@@ -1,3 +1,5 @@
+using System.Data;
+using System.Linq;
 using AutoCount.Stock.Item;
 using LemonCo.Core.Interfaces;
 using LemonCo.Core.Models;
@@ -28,25 +30,87 @@ public class ItemService : IItemService
             _logger.LogInformation("Searching items with query: {Search}", search ?? "all");
 
             var userSession = _connectionManager.GetUserSession();
-            var cmd = ItemDataAccess.Create(userSession, userSession.DBSetting);
+            var dbSetting = _connectionManager.GetDBSetting();
             var items = new List<Core.Models.Item>();
 
-            // Load all items - filtering would require custom SQL query
-            var itemEntities = cmd.LoadAllItem(null);
+            // Step 1: get all active item codes from AutoCount Item master
+            const string sql = "SELECT ItemCode FROM Item WHERE IsActive='T'";
+            var itemCodeTable = dbSetting.GetDataTable(sql, false);
 
-            // ItemEntities.ItemTable contains the data
-            foreach (System.Data.DataRow row in itemEntities.ItemTable.Rows)
+            if (itemCodeTable.Rows.Count == 0)
             {
+                _logger.LogWarning("No items returned from AutoCount Item table.");
+                return items;
+            }
+
+            var itemCodes = itemCodeTable
+                .AsEnumerable()
+                .Select(r => r.Field<string>("ItemCode"))
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Distinct()
+                .ToArray();
+
+            if (itemCodes.Length == 0)
+            {
+                _logger.LogWarning("No valid ItemCode values found in AutoCount Item table.");
+                return items;
+            }
+
+            // Step 2: use AutoCount Stock ItemDataAccess to load full item details
+            var cmd = ItemDataAccess.Create(userSession, userSession.DBSetting);
+            var itemEntities = cmd.LoadAllItem(itemCodes);
+
+            if (itemEntities?.ItemTable == null)
+            {
+                _logger.LogWarning("ItemDataAccess.LoadAllItem returned no ItemTable.");
+                return items;
+            }
+
+            foreach (DataRow row in itemEntities.ItemTable.Rows)
+            {
+                var itemCode = row["ItemCode"]?.ToString() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(itemCode))
+                {
+                    continue;
+                }
+
+                var description = itemEntities.ItemTable.Columns.Contains("Description")
+                    ? row["Description"]?.ToString() ?? string.Empty
+                    : string.Empty;
+
+                var baseUom = itemEntities.ItemTable.Columns.Contains("BaseUOM")
+                    ? row["BaseUOM"]?.ToString() ?? string.Empty
+                    : string.Empty;
+
+                var itemGroup = itemEntities.ItemTable.Columns.Contains("ItemGroup")
+                    ? row["ItemGroup"]?.ToString() ?? "GENERAL"
+                    : "GENERAL";
+
                 items.Add(new Core.Models.Item
                 {
-                    ItemCode = row["ItemCode"].ToString() ?? "",
-                    Description = row["Description"].ToString() ?? "",
-                    BaseUom = row["BaseUOM"].ToString() ?? "",
-                    ItemType = row["ItemGroup"].ToString() ?? "GENERAL",
-                    HasBom = false // BOM check would require additional query
+                    ItemCode = itemCode,
+                    Description = description,
+                    BaseUom = baseUom,
+                    ItemType = itemGroup,
+                    HasBom = false
                 });
             }
 
+            // Step 3: apply in-memory search filter if provided
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                items = items
+                    .Where(i =>
+                        (!string.IsNullOrEmpty(i.ItemCode) &&
+                         i.ItemCode.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(i.Description) &&
+                         i.Description.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+            }
+
+            _logger.LogInformation("Returning {Count} items from AutoCount", items.Count);
             return items;
         });
     }

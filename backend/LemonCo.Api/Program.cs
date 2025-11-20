@@ -92,14 +92,13 @@ builder.Services.Configure<JwtConfig>(
 
 // Configure Authentication
 var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtConfig>();
-var supabaseConfig = builder.Configuration.GetSection("Supabase").Get<SupabaseConfig>();
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer("Local", options =>
+.AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -109,19 +108,6 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtConfig?.Issuer,
         ValidateAudience = true,
         ValidAudience = jwtConfig?.Audience,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.FromMinutes(5)
-    };
-})
-.AddJwtBearer("Supabase", options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(supabaseConfig?.JwtSecret ?? "")),
-        ValidateIssuer = true,
-        ValidIssuer = supabaseConfig?.JwtIssuer,
-        ValidateAudience = false,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(5)
     };
@@ -135,6 +121,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IAssemblyService, AssemblyService>();
+builder.Services.AddScoped<IStockAdjustmentService, StockAdjustmentService>();
 builder.Services.AddScoped<ISalesOrderService, SalesOrderService>();
 builder.Services.AddScoped<ILabelService, LabelService>();
 
@@ -188,6 +175,7 @@ app.MapItemEndpoints();
 app.MapSupplierEndpoints();
 app.MapBomEndpoints();
 app.MapAssemblyEndpoints();
+app.MapStockAdjustmentEndpoints();
 app.MapSalesOrderEndpoints();
 app.MapLabelEndpoints();
 

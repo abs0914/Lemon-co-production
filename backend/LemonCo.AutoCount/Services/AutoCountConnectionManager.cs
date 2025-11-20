@@ -75,9 +75,9 @@ public class AutoCountConnectionManager : IDisposable
             _dbSetting = new DBSetting(
                 DBServerType.SQL2000,  // Use SQL2000 for compatibility with SQL Server 2008+
                 _config.ServerName,
-                _config.DatabaseName,
                 _config.UserId,
-                _config.Password
+                _config.Password,
+                _config.DatabaseName
             );
 
             // Windows Authentication is set via DBSetting constructor parameters

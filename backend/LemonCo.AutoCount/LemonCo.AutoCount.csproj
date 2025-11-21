@@ -11,7 +11,7 @@
     <!-- These are .NET Framework DLLs but .NET 8.0 can load them with some limitations -->
     <PackageReference Include="System.CodeDom" Version="10.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-    <PackageReference Include="System.Security.Permissions" Version="4.7.0" />
+    <PackageReference Include="System.Security.Permissions" Version="6.0.0" />
     <Reference Include="AutoCount">
       <HintPath>C:\Program Files\AutoCount\Accounting 2.2\AutoCount.dll</HintPath>
       <Private>true</Private>

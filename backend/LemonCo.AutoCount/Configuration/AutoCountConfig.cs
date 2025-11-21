@@ -54,5 +54,17 @@ public class AutoCountConfig
     /// AutoCount user password
     /// </summary>
     public string AutoCountPassword { get; set; } = string.Empty;
+
+    /// <summary>
+    /// License server endpoint (e.g., "https://license-server:50051")
+    /// If not set, AutoCount will use its default license server
+    /// </summary>
+    public string? LicenseServerEndpoint { get; set; }
+
+    /// <summary>
+    /// Timeout in seconds for license server communication
+    /// Default is 30 seconds
+    /// </summary>
+    public int LicenseServerTimeoutSeconds { get; set; } = 30;
 }
 

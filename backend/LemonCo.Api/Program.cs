@@ -1,4 +1,6 @@
+using System.Runtime.Loader;
 using System.Text;
+
 using LemonCo.AutoCount.Configuration;
 using LemonCo.AutoCount.Services;
 using LemonCo.Core.Configuration;
@@ -11,6 +13,48 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- Pre-load System.Data.SqlClient before AutoCount tries to use it ---
+// AutoCount's .NET Framework DLLs reference System.Data.SqlClient (4.x).
+// On .NET 8, this assembly has platform restrictions, but we can work around it by:
+// 1. Pre-loading the assembly from the app directory
+// 2. Intercepting assembly resolution to ensure it's found
+try
+{
+    var baseDir = AppContext.BaseDirectory;
+    var sqlClientPath = Path.Combine(baseDir, "System.Data.SqlClient.dll");
+    if (File.Exists(sqlClientPath))
+    {
+        var alreadyLoaded = AppDomain.CurrentDomain.GetAssemblies()
+            .Any(a => a.GetName().Name == "System.Data.SqlClient");
+        if (!alreadyLoaded)
+        {
+            AssemblyLoadContext.Default.LoadFromAssemblyPath(sqlClientPath);
+            Log.Information("Pre-loaded System.Data.SqlClient from {Path}", sqlClientPath);
+        }
+    }
+}
+catch (Exception ex)
+{
+    Log.Warning(ex, "Failed to pre-load System.Data.SqlClient");
+}
+
+// Intercept assembly resolution for System.Data.SqlClient
+AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+{
+    if (args.Name.StartsWith("System.Data.SqlClient,", StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            var asm = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(a => a.GetName().Name == "System.Data.SqlClient");
+            if (asm != null)
+                return asm;
+        }
+        catch { }
+    }
+    return null;
+};
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()

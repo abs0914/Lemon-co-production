@@ -43,7 +43,36 @@ public class StockAdjustmentService : IStockAdjustmentService
                 var userSession = _connectionManager.GetUserSession();
 
                 var cmd = StockAdjustmentCommand.Create(userSession, dbSetting);
-                var doc = cmd.AddNew();
+
+                // AddNew() triggers license validation via gRPC, which may fail if the license server is not accessible
+                // We'll try up to 2 times with a delay to handle transient network issues
+                global::AutoCount.Stock.StockAdjustment.StockAdjustment? doc = null;
+                Exception? lastException = null;
+
+                for (int attempt = 1; attempt <= 2; attempt++)
+                {
+                    try
+                    {
+                        doc = cmd.AddNew();
+                        break; // Success
+                    }
+                    catch (Exception ex) when (ex.Message.Contains("gRPC") || ex.Message.Contains("Error encoding content to base64") || ex.Message.Contains("HttpRequestException"))
+                    {
+                        lastException = ex;
+                        _logger.LogWarning(ex, "Stock adjustment creation failed on attempt {Attempt} due to license server issue", attempt);
+
+                        if (attempt < 2)
+                        {
+                            // Wait before retrying
+                            System.Threading.Thread.Sleep(2000);
+                        }
+                    }
+                }
+
+                if (doc == null)
+                {
+                    throw new Exception($"Failed to create stock adjustment document after 2 attempts. License server may not be accessible. Last error: {lastException?.Message}", lastException);
+                }
 
                 // Header
                 if (!DateTime.TryParse(input.DocDate, out var docDate))
